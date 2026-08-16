@@ -381,7 +381,14 @@ Item {
     }
   }
 
-  Component.onCompleted: positionFile.reload()
+  Component.onCompleted: {
+    console.log("ytmini shell:", typeof shell, shell !== null ? Object.keys(shell).slice(0,12).join(",") : "null")
+    if (shell && typeof shell.serviceFor === "function") {
+      var ls = shell.serviceFor("omarchy.lock")
+      console.log("ytmini lockService:", ls, ls ? ("locked=" + ls.locked) : "")
+    }
+    positionFile.reload()
+  }
 
   Process {
     id: streamProcess
