@@ -42,10 +42,25 @@ Item {
   readonly property color muted: foreground
   // Third-party pattern (as in hancore.bongocat): read the first-party lock
   // service state so the video surface never maps over the lock screen.
-  readonly property var lockService: shell && typeof shell.serviceFor === "function"
-    ? shell.serviceFor("omarchy.lock")
-    : null
-  readonly property bool sessionLocked: lockService && lockService.locked
+  // shell is injected by the host AFTER Component.onCompleted, and the lock
+  // service registers lazily — resolve it on a timer until present, then the
+  // reactive chain tracks lockService.locked live.
+  property var lockService: null
+  readonly property bool sessionLocked: lockService !== null && lockService.locked === true
+
+  Timer {
+    id: lockServiceResolve
+    interval: 1000
+    repeat: true
+    running: true
+    onTriggered: {
+      if (root.lockService !== null) { lockServiceResolve.stop(); return }
+      if (root.shell && typeof root.shell.serviceFor === "function") {
+        var ls = root.shell.serviceFor("omarchy.lock")
+        if (ls !== null && ls !== undefined) root.lockService = ls
+      }
+    }
+  }
   property bool wasPlayingBeforeLock: false
   onSessionLockedChanged: {
     if (sessionLocked) {
@@ -381,14 +396,7 @@ Item {
     }
   }
 
-  Component.onCompleted: {
-    console.log("ytmini shell:", typeof shell, shell !== null ? Object.keys(shell).slice(0,12).join(",") : "null")
-    if (shell && typeof shell.serviceFor === "function") {
-      var ls = shell.serviceFor("omarchy.lock")
-      console.log("ytmini lockService:", ls, ls ? ("locked=" + ls.locked) : "")
-    }
-    positionFile.reload()
-  }
+  Component.onCompleted: positionFile.reload()
 
   Process {
     id: streamProcess
