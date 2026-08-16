@@ -740,54 +740,74 @@ Item {
           anchors.rightMargin: 14
           anchors.top: seekBar.bottom
           anchors.topMargin: 4
-          spacing: 24
+          spacing: 14
 
-          Text {
-            color: root.foreground
-            font.pixelSize: 22
-            font.family: Style.fontFamily
-            text: player.playbackState === MediaPlayer.PlayingState ? "\uF03E4" : "\uF040A"
-            MouseArea {
-              anchors.fill: parent
-              cursorShape: Qt.PointingHandCursor
-              onClicked: player.playbackState === MediaPlayer.PlayingState ? player.pause() : player.play()
+          Item {
+            width: 36
+            height: 30
+            Text {
+              anchors.centerIn: parent
+              color: root.foreground
+              font.pixelSize: 22
+              font.family: Style.fontFamily
+              text: player.playbackState === MediaPlayer.PlayingState ? "\uF03E4" : "\uF040A"
+              MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: player.playbackState === MediaPlayer.PlayingState ? player.pause() : player.play()
+              }
             }
           }
 
-          Text {
-            color: root.foreground
-            font.pixelSize: 22
-            font.family: Style.fontFamily
-            text: "\uF0486"
-            opacity: root.nextTitle !== "" ? 1 : 0.35
-            MouseArea {
-              anchors.fill: parent
-              cursorShape: Qt.PointingHandCursor
-              onClicked: root.advance()
+          Item {
+            width: 36
+            height: 30
+            Text {
+              anchors.centerIn: parent
+              color: root.foreground
+              font.pixelSize: 22
+              font.family: Style.fontFamily
+              text: "\uF04AD"
+              opacity: root.nextTitle !== "" ? 1 : 0.35
+              MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: root.advance()
+              }
             }
           }
 
-          Text {
-            color: audio.muted ? root.urgent : root.foreground
-            font.pixelSize: 22
-            font.family: Style.fontFamily
-            text: audio.muted ? "\uF0E08" : "\uF057E"
-            MouseArea {
-              anchors.fill: parent
-              cursorShape: Qt.PointingHandCursor
-              onClicked: audio.muted = !audio.muted
+          Item {
+            width: 36
+            height: 30
+            Text {
+              anchors.centerIn: parent
+              color: audio.muted ? root.urgent : root.foreground
+              font.pixelSize: 22
+              font.family: Style.fontFamily
+              text: audio.muted ? "\uF0581" : "\uF057E"
+              MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: audio.muted = !audio.muted
+              }
             }
           }
 
-          Text {
-            color: root.urgent
-            font.pixelSize: 22
-            font.family: Style.fontFamily
-            text: "\uF04DB"
-            MouseArea {
-              anchors.fill: parent
-              cursorShape: Qt.PointingHandCursor
-              onClicked: root.stop()
+          Item {
+            width: 36
+            height: 30
+            Text {
+              anchors.centerIn: parent
+              color: root.urgent
+              font.pixelSize: 22
+              font.family: Style.fontFamily
+              text: "\uF04DB"
+              MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: root.stop()
+              }
             }
           }
         }
