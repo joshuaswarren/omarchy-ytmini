@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=YT Mini
+Comment=Throw a YouTube URL to the Omarchy YT Mini panel
+Exec=ytmini-throw %u
+Terminal=false
+NoDisplay=true
+MimeType=x-scheme-handler/ytmini;

@@ -1,0 +1,26 @@
+#!/bin/bash
+# ytmini://throw?url=<percent-encoded youtube url>
+# xdg scheme handler for the YT Mini Omarchy panel.
+set -u
+
+url=""
+for a in "$@"; do
+  case "$a" in
+    ytmini://throw?url=*) url="${a#*url=}" ;;
+    ytmini://*url=*) url="${a#*url=}" ;;
+  esac
+done
+
+if [ -z "$url" ]; then
+  echo "usage: ytmini://throw?url=<youtube-url>" >&2
+  exit 1
+fi
+
+# Decode percent-escapes (%3A %2F %3F %26 %3D ...).
+url=$(printf '%b' "${url//%/\\x}")
+
+# Keep the value JSON-safe; the panel re-validates it as a YouTube URL anyway.
+url=${url//\"/}
+url=${url//\\/}
+
+exec omarchy-shell shell summon io.github.joshuaswarren.ytmini "{\"url\":\"$url\"}"
