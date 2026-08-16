@@ -46,6 +46,46 @@ Item {
     ? shell.serviceFor("omarchy.lock")
     : null
   readonly property bool sessionLocked: lockService && lockService.locked
+  property bool wasPlayingBeforeLock: false
+  onSessionLockedChanged: {
+    if (sessionLocked) {
+      wasPlayingBeforeLock = player.playbackState === MediaPlayer.PlayingState
+      player.pause()
+    } else if (wasPlayingBeforeLock) {
+      player.play()
+    }
+  }
+
+  // ---- window position (drag the header; persisted across sessions) ----
+  readonly property string stateDir: (Quickshell.env("XDG_STATE_HOME")
+    || (Quickshell.env("HOME") + "/.local/state")) + "/ytmini"
+  property int marginRight: 14
+  property int marginBottom: 14
+
+  function applyCorner(corner) {
+    var w = window && window.screen ? window.screen.width : 0
+    var h = window && window.screen ? window.screen.height : 0
+    if (w <= 0 || h <= 0) return
+    if (corner === "tl") { root.marginRight = w - window.width - 14; root.marginBottom = h - window.height - 14 }
+    else if (corner === "tr") { root.marginRight = 14; root.marginBottom = h - window.height - 14 }
+    else if (corner === "bl") { root.marginRight = w - window.width - 14; root.marginBottom = 14 }
+    else { root.marginRight = 14; root.marginBottom = 14 }
+    savePosition()
+  }
+
+  function clampMargins() {
+    var w = window && window.screen ? window.screen.width : 0
+    var h = window && window.screen ? window.screen.height : 0
+    if (w > 0) root.marginRight = Math.max(0, Math.min(root.marginRight, w - window.width))
+    if (h > 0) root.marginBottom = Math.max(0, Math.min(root.marginBottom, h - window.height))
+  }
+
+  function savePosition() {
+    saveProcess.marginR = "" + Math.round(root.marginRight)
+    saveProcess.marginB = "" + Math.round(root.marginBottom)
+    saveProcess.running = true
+  }
+
 
   function open(payloadJson) {
     var payload = ({})
@@ -55,6 +95,13 @@ Item {
     if (payload.grab === false) root.grabMode = false
     if (payload.radio === false) root.radio = false
     if (payload.radio === true) root.radio = true
+    if (payload.corner) applyCorner(String(payload.corner))
+    else if (payload.move && payload.move.right !== undefined) {
+      if (payload.move.right !== undefined) root.marginRight = Math.max(0, payload.move.right | 0)
+      if (payload.move.bottom !== undefined) root.marginBottom = Math.max(0, payload.move.bottom | 0)
+      clampMargins()
+      savePosition()
+    }
     if (payload.url) root.handoff(String(payload.url))
     else if (payload.clipboard) clipProcess.running = true
   }
@@ -284,6 +331,34 @@ Item {
     }
   }
 
+  // Position persistence. Numbers only in the payload; no interpolation of
+  // anything user-controlled.
+  Process {
+    id: saveProcess
+    property string marginR: "14"
+    property string marginB: "14"
+    running: false
+    command: ["sh", "-c",
+      "mkdir -p '" + root.stateDir + "' && printf '{\"right\":%s,\"bottom\":%s}' "
+      + saveProcess.marginR + " " + saveProcess.marginB
+      + " > '" + root.stateDir + "/window.json'"]
+  }
+
+  FileView {
+    id: positionFile
+    path: root.stateDir + "/window.json"
+    watchChanges: false
+    onLoaded: {
+      try {
+        var doc = JSON.parse(text())
+        if (doc.right !== undefined) root.marginRight = Math.max(0, doc.right | 0)
+        if (doc.bottom !== undefined) root.marginBottom = Math.max(0, doc.bottom | 0)
+      } catch (e) { /* first run or corrupt file: keep defaults */ }
+    }
+  }
+
+  Component.onCompleted: positionFile.reload()
+
   Process {
     id: streamProcess
     property var item: null
@@ -357,9 +432,11 @@ Item {
       bottom: true
     }
     margins {
-      right: 14
-      bottom: 14
+      right: root.marginRight
+      bottom: root.marginBottom
     }
+    onWidthChanged: root.clampMargins()
+    onHeightChanged: root.clampMargins()
     width: root.videoWidth
     height: root.playState === "playing" || root.playState === "downloading"
       ? root.videoHeight + 74
@@ -389,6 +466,30 @@ Item {
         width: parent.width
         height: 30
         color: root.surface
+
+        // Drag anywhere on the header (glyphs sit above and still work).
+        MouseArea {
+          id: headerDrag
+          anchors.fill: parent
+          cursorShape: Qt.SizeAllCursor
+          property int startMouseX: 0
+          property int startMouseY: 0
+          property int startRight: 0
+          property int startBottom: 0
+          onPressed: function(mouse) {
+            startMouseX = mouse.x
+            startMouseY = mouse.y
+            startRight = root.marginRight
+            startBottom = root.marginBottom
+          }
+          onPositionChanged: function(mouse) {
+            if (!pressed) return
+            root.marginRight = startRight - (mouse.x - startMouseX)
+            root.marginBottom = startBottom - (mouse.y - startMouseY)
+            root.clampMargins()
+          }
+          onReleased: root.savePosition()
+        }
 
         Text {
           anchors.left: parent.left

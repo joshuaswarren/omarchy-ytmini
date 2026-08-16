@@ -61,6 +61,20 @@ Click it on any YouTube tab: Chromium asks once whether to open `ytmini`
 links — allow and remember. From then on it is one click, zero typing, works
 on watch pages, playlists, and `youtu.be` shorts links.
 
+## Window position
+
+Drag the window by its header bar — the position is clamped to the screen and
+persisted to `$XDG_STATE_HOME/ytmini/window.json`, surviving re-summons and
+reboots. Scripts can place it absolutely or by corner:
+
+```
+omarchy-shell shell summon io.github.joshuaswarren.ytmini '{"corner":"tl"}'   # tl|tr|bl|br
+omarchy-shell shell summon io.github.joshuaswarren.ytmini '{"move":{"right":200,"bottom":300}}'
+```
+
+Locking the session pauses playback and hides the window; unlocking resumes if
+it was playing when locked.
+
 
 Prefer a toolbar button and keyboard shortcut? That is the planned v0.2
 companion extension (native-messaging host + MV3 extension, same pattern as
