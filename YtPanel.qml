@@ -482,8 +482,8 @@ Item {
     onHeightChanged: root.clampMargins()
     width: root.videoWidth
     height: root.playState === "playing" || root.playState === "downloading"
-      ? root.videoHeight + 74
-      : 148
+      ? root.videoHeight + 92
+      : 152
     color: root.background
     WlrLayershell.namespace: "ytmini"
     WlrLayershell.layer: WlrLayer.Top
@@ -507,7 +507,7 @@ Item {
       // header: title / status + controls
       Rectangle {
         width: parent.width
-        height: 30
+        height: 34
         color: root.surface
 
         // Drag anywhere on the header (glyphs sit above and still work).
@@ -538,7 +538,7 @@ Item {
           anchors.left: parent.left
           anchors.leftMargin: 10
           anchors.verticalCenter: parent.verticalCenter
-          width: parent.width - 130
+          width: parent.width - 150
           elide: Text.ElideRight
           color: root.playState === "error" ? root.urgent : root.foreground
           text: {
@@ -548,57 +548,52 @@ Item {
             if (root.playState === "playing") return root.currentTitle
             return root.statusText !== "" ? root.statusText : "YT Mini"
           }
-          font.pixelSize: 12
-          font.family: Style.fontFamily
-        }
-
-        Text {
-          id: radioGlyph
-          anchors.right: grabGlyph.right
-          anchors.rightMargin: -34
-          anchors.verticalCenter: parent.verticalCenter
-          color: root.radio ? root.accent : root.muted
-          opacity: root.playState === "playing" || root.playState === "resolving" ? 1 : 0.4
-          text: "∞"
-          font.pixelSize: 14
-          font.family: Style.fontFamily
-          MouseArea {
-            anchors.fill: parent
-            cursorShape: Qt.PointingHandCursor
-            onClicked: root.radio = !root.radio
-          }
-        }
-
-        Text {
-          id: grabGlyph
-          anchors.right: closeGlyph.right
-          anchors.rightMargin: -34
-          anchors.verticalCenter: parent.verticalCenter
-          color: root.grabMode ? root.accent : root.muted
-          opacity: root.playState === "idle" || root.playState === "error" ? 1 : 0.4
-          text: "\uF01DA"
-          font.pixelSize: 14
-          font.family: Style.fontFamily
-          MouseArea {
-            anchors.fill: parent
-            cursorShape: Qt.PointingHandCursor
-            onClicked: root.grabMode = !root.grabMode
-          }
-        }
-
-        Text {
-          id: closeGlyph
-          anchors.right: parent.right
-          anchors.rightMargin: 10
-          anchors.verticalCenter: parent.verticalCenter
-          color: root.foreground
-          text: "\uF0156"
           font.pixelSize: 13
           font.family: Style.fontFamily
-          MouseArea {
-            anchors.fill: parent
-            cursorShape: Qt.PointingHandCursor
-            onClicked: root.close()
+        }
+
+        Row {
+          anchors.right: parent.right
+          anchors.rightMargin: 12
+          anchors.verticalCenter: parent.verticalCenter
+          spacing: 18
+
+          Text {
+            color: root.radio ? root.accent : root.muted
+            opacity: root.playState === "playing" || root.playState === "resolving" ? 1 : 0.4
+            text: "∞"
+            font.pixelSize: 16
+            font.family: Style.fontFamily
+            MouseArea {
+              anchors.fill: parent
+              cursorShape: Qt.PointingHandCursor
+              onClicked: root.radio = !root.radio
+            }
+          }
+
+          Text {
+            color: root.grabMode ? root.accent : root.muted
+            opacity: root.playState === "idle" || root.playState === "error" ? 1 : 0.4
+            text: "\uF01DA"
+            font.pixelSize: 16
+            font.family: Style.fontFamily
+            MouseArea {
+              anchors.fill: parent
+              cursorShape: Qt.PointingHandCursor
+              onClicked: root.grabMode = !root.grabMode
+            }
+          }
+
+          Text {
+            color: root.foreground
+            text: "\uF0156"
+            font.pixelSize: 16
+            font.family: Style.fontFamily
+            MouseArea {
+              anchors.fill: parent
+              cursorShape: Qt.PointingHandCursor
+              onClicked: root.close()
+            }
           }
         }
       }
@@ -692,7 +687,7 @@ Item {
       // controls (playing)
       Item {
         width: parent.width
-        height: root.playState === "playing" ? 42 : 0
+        height: root.playState === "playing" ? 56 : 0
         visible: height > 0
 
         // seek bar
@@ -701,9 +696,9 @@ Item {
           anchors.left: parent.left
           anchors.right: parent.right
           anchors.top: parent.top
-          anchors.leftMargin: 10
-          anchors.rightMargin: 10
-          height: 6
+          anchors.leftMargin: 14
+          anchors.rightMargin: 14
+          height: 7
           radius: 3
           color: root.muted
           opacity: 0.25
@@ -731,25 +726,25 @@ Item {
         Text {
           id: timeLabel
           anchors.left: parent.left
-          anchors.leftMargin: 10
+          anchors.leftMargin: 14
           anchors.top: seekBar.bottom
-          anchors.topMargin: 6
+          anchors.topMargin: 9
           color: root.muted
-          font.pixelSize: 11
+          font.pixelSize: 13
           font.family: Style.fontFamily
           text: fmt(player.position) + " / " + fmt(player.duration)
         }
 
         Row {
           anchors.right: parent.right
-          anchors.rightMargin: 6
+          anchors.rightMargin: 14
           anchors.top: seekBar.bottom
-          anchors.topMargin: 2
-          spacing: 14
+          anchors.topMargin: 4
+          spacing: 24
 
           Text {
             color: root.foreground
-            font.pixelSize: 15
+            font.pixelSize: 22
             font.family: Style.fontFamily
             text: player.playbackState === MediaPlayer.PlayingState ? "\uF03E4" : "\uF040A"
             MouseArea {
@@ -761,7 +756,7 @@ Item {
 
           Text {
             color: root.foreground
-            font.pixelSize: 15
+            font.pixelSize: 22
             font.family: Style.fontFamily
             text: "\uF0486"
             opacity: root.nextTitle !== "" ? 1 : 0.35
@@ -774,7 +769,7 @@ Item {
 
           Text {
             color: audio.muted ? root.urgent : root.foreground
-            font.pixelSize: 15
+            font.pixelSize: 22
             font.family: Style.fontFamily
             text: audio.muted ? "\uF0E08" : "\uF057E"
             MouseArea {
@@ -786,7 +781,7 @@ Item {
 
           Text {
             color: root.urgent
-            font.pixelSize: 15
+            font.pixelSize: 22
             font.family: Style.fontFamily
             text: "\uF04DB"
             MouseArea {
