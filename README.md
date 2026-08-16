@@ -50,22 +50,26 @@ update-desktop-database ~/.local/share/applications
 xdg-mime default io.github.joshuaswarren.ytmini.desktop x-scheme-handler/ytmini
 ```
 
-Then add a bookmark in Helium (bookmark bar or Helium's pinned spaces) with
-this as the URL:
+Then add the fling bookmark (scripted or by hand — see below):
 
-```
-javascript:location.href='ytmini://throw?url='+encodeURIComponent(location.href)
-```
 
 Click it on any YouTube tab: Chromium asks once whether to open `ytmini`
 links — allow and remember. From then on it is one click, zero typing, works
 on watch pages, playlists, and `youtu.be` shorts links.
 
+**Adding the bookmark automatically:** `scripts/add-browser-bookmark.py`
+appends the bookmarklet to any Chromium-family browser's bookmark bar
+(Helium: `~/.config/net.imput.helium/Default/Bookmarks`). The browser must
+be **closed** while it runs — Chromium rewrites the file from memory on exit.
+Idempotent; `--dry` previews.
+
+The manual equivalent: add a bookmark whose URL is
+`javascript:location.href='ytmini://throw?url='+encodeURIComponent(location.href)`.
+
 ## Window position
 
 Drag the window by its header bar — the position is clamped to the screen and
 persisted to `$XDG_STATE_HOME/ytmini/window.json`, surviving re-summons and
-reboots. Scripts can place it absolutely or by corner:
 
 ```
 omarchy-shell shell summon io.github.joshuaswarren.ytmini '{"corner":"tl"}'   # tl|tr|bl|br

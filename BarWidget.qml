@@ -27,7 +27,7 @@ Item {
       id: label
       anchors.centerIn: parent
       color: mouse.containsPress ? Color.background : root.foreground
-      text: "▶ YT"
+      text: "\uF040A YT"
       font.pixelSize: 12
     }
 

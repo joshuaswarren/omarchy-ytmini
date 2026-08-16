@@ -242,8 +242,15 @@ Item {
     var item = root.queue[0]
     root.queue = root.queue.slice(1)
     root.currentId = item.id
-    root.currentTitle = item.title === "" ? item.id : item.title
-    root.playedIds = root.playedIds.concat([item.id]).slice(-40)
+    root.currentTitle = item.title
+    if (item.title === "") {
+      // Flat handoffs carry no title; fetch it in parallel (grab mode).
+      // Stream mode also gets the title from its -J resolve.
+      titleProcess.itemId = item.id
+      titleProcess.command = ["yt-dlp", "--no-warnings", "--no-playlist", "--print", "title", item.url]
+      titleProcess.running = true
+      root.currentTitle = item.id
+    }
     if (root.grabMode) startDownload(item)
     else startStream(item)
   }
@@ -277,7 +284,7 @@ Item {
     streamProcess.item = item
     streamProcess.command = [
       "yt-dlp", "--no-warnings", "--no-playlist",
-      "-f", "18/22/best", "-g", item.url
+      "-f", "18/22/best", "-J", item.url
     ]
     streamProcess.running = true
   }
@@ -302,6 +309,7 @@ Item {
     player.source = sourceUrl
     root.playState = "playing"
     root.statusText = ""
+    if (title) root.currentTitle = title
     player.play()
   }
 
@@ -379,13 +387,18 @@ Item {
     stdout: StdioCollector {
       waitForEnd: true
       onStreamFinished: {
-        var line = ""
-        var lines = String(text || "").split("\n")
-        for (var i = 0; i < lines.length; i++) {
-          if (lines[i].trim() !== "") line = lines[i].trim()
-        }
-        if (line.indexOf("http") === 0) root.playSource(line, streamProcess.item ? streamProcess.item.title : "")
-        else {
+        var url = ""
+        var title = ""
+        try {
+          var doc = JSON.parse(String(text || ""))
+          url = String(doc.url || "")
+          title = String(doc.title || "")
+        } catch (e) { url = "" }
+        if (url.indexOf("http") === 0) {
+          if (title !== "" && streamProcess.item && streamProcess.item.id === root.currentId)
+            root.currentTitle = title
+          root.playSource(url, title)
+        } else {
           root.playState = "error"
           root.statusText = "Stream resolution failed"
         }
@@ -394,6 +407,20 @@ Item {
     stderr: StdioCollector {
       waitForEnd: true
       onStreamFinished: if (String(text).trim() !== "") console.warn("ytmini", String(text).trim())
+    }
+  }
+
+  // Parallel title fetch for grab mode (stream mode gets it from -J).
+  Process {
+    id: titleProcess
+    property string itemId: ""
+    running: false
+    stdout: StdioCollector {
+      waitForEnd: true
+      onStreamFinished: {
+        var t = String(text || "").trim()
+        if (t !== "" && titleProcess.itemId === root.currentId) root.currentTitle = t
+      }
     }
   }
 
@@ -544,7 +571,7 @@ Item {
           anchors.verticalCenter: parent.verticalCenter
           color: root.grabMode ? root.accent : root.muted
           opacity: root.playState === "idle" || root.playState === "error" ? 1 : 0.4
-          text: "⤓"
+          text: "\uF01DA"
           font.pixelSize: 14
           MouseArea {
             anchors.fill: parent
@@ -559,7 +586,7 @@ Item {
           anchors.rightMargin: 10
           anchors.verticalCenter: parent.verticalCenter
           color: root.foreground
-          text: "✕"
+          text: "\uF0156"
           font.pixelSize: 13
           MouseArea {
             anchors.fill: parent
@@ -712,7 +739,7 @@ Item {
           Text {
             color: root.foreground
             font.pixelSize: 15
-            text: player.playbackState === MediaPlayer.PlayingState ? "⏸" : "▶"
+            text: player.playbackState === MediaPlayer.PlayingState ? "\uF03E4" : "\uF040A"
             MouseArea {
               anchors.fill: parent
               cursorShape: Qt.PointingHandCursor
@@ -723,7 +750,7 @@ Item {
           Text {
             color: root.foreground
             font.pixelSize: 15
-            text: "⏭"
+            text: "\uF0486"
             opacity: root.nextTitle !== "" ? 1 : 0.35
             MouseArea {
               anchors.fill: parent
@@ -735,7 +762,7 @@ Item {
           Text {
             color: audio.muted ? root.urgent : root.foreground
             font.pixelSize: 15
-            text: audio.muted ? "🔇" : "🔊"
+            text: audio.muted ? "\uF0E08" : "\uF057E"
             MouseArea {
               anchors.fill: parent
               cursorShape: Qt.PointingHandCursor
@@ -746,7 +773,7 @@ Item {
           Text {
             color: root.urgent
             font.pixelSize: 15
-            text: "■"
+            text: "\uF04DB"
             MouseArea {
               anchors.fill: parent
               cursorShape: Qt.PointingHandCursor
