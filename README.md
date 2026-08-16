@@ -61,9 +61,22 @@ Click it on any YouTube tab: Chromium asks once whether to open `ytmini`
 links — allow and remember. From then on it is one click, zero typing, works
 on watch pages, playlists, and `youtu.be` shorts links.
 
+
 Prefer a toolbar button and keyboard shortcut? That is the planned v0.2
 companion extension (native-messaging host + MV3 extension, same pattern as
 Omarchy's built-in yt-dlp extension).
+
+## Troubleshooting
+
+`omarchy-shell` watches plugin files and hot-reloads, but an in-place reload
+can leave a stale instance running (symptom: summons return `ok` but code
+changes or payloads seem ignored). After `omarchy plugin update` or manual
+edits, if behavior looks stale:
+
+```
+omarchy plugin disable io.github.joshuaswarren.ytmini
+omarchy plugin enable io.github.joshuaswarren.ytmini
+```
 
 ## Playlists and up-next
 
