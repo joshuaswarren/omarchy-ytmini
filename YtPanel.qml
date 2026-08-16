@@ -284,6 +284,9 @@ Item {
     streamProcess.item = item
     streamProcess.command = [
       "yt-dlp", "--no-warnings", "--no-playlist",
+      // Web-client URLs play headerless; android_vr URLs 403 under
+      // QtMultimedia's ffmpeg User-Agent.
+      "--extractor-args", "youtube:player_client=default",
       "-f", "18/22/best", "-J", item.url
     ]
     streamProcess.running = true
