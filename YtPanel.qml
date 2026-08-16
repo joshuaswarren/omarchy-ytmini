@@ -574,7 +574,7 @@ Item {
           Text {
             color: root.grabMode ? root.accent : root.muted
             opacity: root.playState === "idle" || root.playState === "error" ? 1 : 0.4
-            text: "\uF01DA"
+            text: "󰇚"
             font.pixelSize: 16
             font.family: Style.fontFamily
             MouseArea {
@@ -586,7 +586,7 @@ Item {
 
           Text {
             color: root.foreground
-            text: "\uF0156"
+            text: "󰅖"
             font.pixelSize: 16
             font.family: Style.fontFamily
             MouseArea {
@@ -750,7 +750,7 @@ Item {
               color: root.foreground
               font.pixelSize: 22
               font.family: Style.fontFamily
-              text: player.playbackState === MediaPlayer.PlayingState ? "\uF03E4" : "\uF040A"
+              text: player.playbackState === MediaPlayer.PlayingState ? "󰏤" : "󰐊"
               MouseArea {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
@@ -767,7 +767,7 @@ Item {
               color: root.foreground
               font.pixelSize: 22
               font.family: Style.fontFamily
-              text: "\uF04AD"
+              text: "󰒭"
               opacity: root.nextTitle !== "" ? 1 : 0.35
               MouseArea {
                 anchors.fill: parent
@@ -785,7 +785,7 @@ Item {
               color: audio.muted ? root.urgent : root.foreground
               font.pixelSize: 22
               font.family: Style.fontFamily
-              text: audio.muted ? "\uF0581" : "\uF057E"
+              text: audio.muted ? "󰖁" : "󰕾"
               MouseArea {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
@@ -802,7 +802,7 @@ Item {
               color: root.urgent
               font.pixelSize: 22
               font.family: Style.fontFamily
-              text: "\uF04DB"
+              text: "󰓛"
               MouseArea {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
