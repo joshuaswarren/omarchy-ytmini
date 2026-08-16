@@ -40,6 +40,12 @@ Item {
   readonly property color accent: Color.accent
   readonly property color urgent: Color.urgent
   readonly property color muted: foreground
+  // Third-party pattern (as in hancore.bongocat): read the first-party lock
+  // service state so the video surface never maps over the lock screen.
+  readonly property var lockService: shell && typeof shell.serviceFor === "function"
+    ? shell.serviceFor("omarchy.lock")
+    : null
+  readonly property bool sessionLocked: lockService && lockService.locked
 
   function open(payloadJson) {
     var payload = ({})
@@ -325,6 +331,8 @@ Item {
 
   MediaPlayer {
     id: player
+    videoOutput: videoOut
+
     audioOutput: AudioOutput {
       id: audio
       volume: 0.9
@@ -341,7 +349,7 @@ Item {
   // ---- window ----
   PanelWindow {
     id: window
-    visible: root.opened
+    visible: root.opened && !root.sessionLocked
     anchors {
       top: false
       left: false
@@ -457,6 +465,7 @@ Item {
           : 0
 
         VideoOutput {
+          id: videoOut
           anchors.fill: parent
           fillMode: VideoOutput.PreserveAspectFit
           visible: root.playState === "playing"
