@@ -62,15 +62,28 @@ Item {
   property int marginRight: 14
   property int marginBottom: 14
 
+  property string pendingCorner: ""
+
   function applyCorner(corner) {
     var w = window && window.screen ? window.screen.width : 0
     var h = window && window.screen ? window.screen.height : 0
-    if (w <= 0 || h <= 0) return
+    if (w <= 0 || h <= 0) {
+      // Window not mapped yet: retry when it settles (onWidth/HeightChanged).
+      root.pendingCorner = corner
+      return
+    }
     if (corner === "tl") { root.marginRight = w - window.width - 14; root.marginBottom = h - window.height - 14 }
     else if (corner === "tr") { root.marginRight = 14; root.marginBottom = h - window.height - 14 }
     else if (corner === "bl") { root.marginRight = w - window.width - 14; root.marginBottom = 14 }
     else { root.marginRight = 14; root.marginBottom = 14 }
     savePosition()
+  }
+
+  function flushPendingCorner() {
+    if (root.pendingCorner === "") return
+    var c = root.pendingCorner
+    root.pendingCorner = ""
+    applyCorner(c)
   }
 
   function clampMargins() {
@@ -435,7 +448,7 @@ Item {
       right: root.marginRight
       bottom: root.marginBottom
     }
-    onWidthChanged: root.clampMargins()
+    onWidthChanged: { root.clampMargins(); root.flushPendingCorner() }
     onHeightChanged: root.clampMargins()
     width: root.videoWidth
     height: root.playState === "playing" || root.playState === "downloading"
