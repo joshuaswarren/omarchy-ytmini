@@ -22,7 +22,7 @@ Built for two use cases:
 
 1. **From the browser (Helium/any Chromium):** a one-time setup registers the
    `ytmini://` scheme, then a bookmarklet throws the current tab in one click —
-   see **Throwing from Helium** below.
+   see **Throwing from your browser** below.
 2. **Clipboard:** copy any YouTube watch/playlist URL (`Ctrl+L Ctrl+C`,
    right-click a link), click the **▶ YT** bar widget. If the clipboard holds
    a YouTube URL it plays immediately; otherwise the window opens with a
@@ -38,10 +38,11 @@ Built for two use cases:
 
 Payload keys: `url`, `clipboard` (reads `wl-paste`), `grab` (bool), `radio` (bool).
 
-## Throwing from Helium
+## Throwing from your browser
 
-Helium is Chromium-based, so external protocol handlers and bookmarklets work
-like Chrome. One-time setup:
+Works in any Chromium-family browser (Helium, Chrome, Brave, Edge, Vivaldi):
+external protocol handlers and bookmarklets behave
+like Chrome's. One-time setup:
 
 ```sh
 cp scripts/ytmini-throw ~/.local/bin/                          # on PATH in Omarchy
@@ -59,7 +60,8 @@ on watch pages, playlists, and `youtu.be` shorts links.
 
 **Adding the bookmark automatically:** `scripts/add-browser-bookmark.py`
 appends the bookmarklet to any Chromium-family browser's bookmark bar
-(Helium: `~/.config/net.imput.helium/Default/Bookmarks`). The browser must
+(Helium: `~/.config/net.imput.helium/Default/Bookmarks`; Chrome:
+`~/.config/google-chrome/default/Bookmarks`). The browser must
 be **closed** while it runs — Chromium rewrites the file from memory on exit.
 Idempotent; `--dry` previews.
 
