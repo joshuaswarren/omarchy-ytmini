@@ -29,6 +29,7 @@ Item {
       color: mouse.containsPress ? Color.background : root.foreground
       text: "\uF040A YT"
       font.pixelSize: 12
+      font.family: root.bar && root.bar.fontFamily ? root.bar.fontFamily : "monospace"
     }
 
     MouseArea {

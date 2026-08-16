@@ -546,6 +546,7 @@ Item {
             return root.statusText !== "" ? root.statusText : "YT Mini"
           }
           font.pixelSize: 12
+          font.family: Style.fontFamily
         }
 
         Text {
@@ -557,6 +558,7 @@ Item {
           opacity: root.playState === "playing" || root.playState === "resolving" ? 1 : 0.4
           text: "∞"
           font.pixelSize: 14
+          font.family: Style.fontFamily
           MouseArea {
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
@@ -573,6 +575,7 @@ Item {
           opacity: root.playState === "idle" || root.playState === "error" ? 1 : 0.4
           text: "\uF01DA"
           font.pixelSize: 14
+          font.family: Style.fontFamily
           MouseArea {
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
@@ -588,6 +591,7 @@ Item {
           color: root.foreground
           text: "\uF0156"
           font.pixelSize: 13
+          font.family: Style.fontFamily
           MouseArea {
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
@@ -650,6 +654,7 @@ Item {
             color: root.foreground
             selectionColor: root.accent
             font.pixelSize: 13
+            font.family: Style.fontFamily
             clip: true
             verticalAlignment: TextInput.AlignVCenter
             onAccepted: if (text.trim() !== "") root.handoff(text)
@@ -663,6 +668,7 @@ Item {
               color: root.muted
               opacity: 0.6
               font.pixelSize: 13
+              font.family: Style.fontFamily
               text: "Paste a YouTube URL and press Enter…"
             }
           }
@@ -673,6 +679,7 @@ Item {
           color: root.muted
           opacity: 0.7
           font.pixelSize: 11
+          font.family: Style.fontFamily
           text: root.grabMode
             ? "Grab mode: downloads first — full quality, instant seeking"
             : "Stream mode: instant start — toggle ⤓ for grab mode"
@@ -726,6 +733,7 @@ Item {
           anchors.topMargin: 6
           color: root.muted
           font.pixelSize: 11
+          font.family: Style.fontFamily
           text: fmt(player.position) + " / " + fmt(player.duration)
         }
 
@@ -739,6 +747,7 @@ Item {
           Text {
             color: root.foreground
             font.pixelSize: 15
+            font.family: Style.fontFamily
             text: player.playbackState === MediaPlayer.PlayingState ? "\uF03E4" : "\uF040A"
             MouseArea {
               anchors.fill: parent
@@ -750,6 +759,7 @@ Item {
           Text {
             color: root.foreground
             font.pixelSize: 15
+            font.family: Style.fontFamily
             text: "\uF0486"
             opacity: root.nextTitle !== "" ? 1 : 0.35
             MouseArea {
@@ -762,6 +772,7 @@ Item {
           Text {
             color: audio.muted ? root.urgent : root.foreground
             font.pixelSize: 15
+            font.family: Style.fontFamily
             text: audio.muted ? "\uF0E08" : "\uF057E"
             MouseArea {
               anchors.fill: parent
@@ -773,6 +784,7 @@ Item {
           Text {
             color: root.urgent
             font.pixelSize: 15
+            font.family: Style.fontFamily
             text: "\uF04DB"
             MouseArea {
               anchors.fill: parent
