@@ -153,7 +153,13 @@ Item {
   // ---- URL handling ----
   function isYouTubeUrl(u) {
     return /^https?:\/\/(www\.|m\.|music\.)?youtube\.com\/(watch|playlist)\?[^ ]*$/.test(u)
-      || /^https:\/\/youtu\.be\/[\w-]{6,}/.test(u)
+      || /^https:\/\/youtu\.be\/[\w-]{6,}(\?.*)?$/.test(u)
+  }
+
+  // Every id used downstream (watch URL, RD mix, yt-dlp -o cache path) must
+  // be strictly [\w-]; anything else could traverse the -o template.
+  function isSafeId(id) {
+    return /^[\w-]{6,}$/.test(id)
   }
 
   function queryParam(u, key) {
@@ -170,6 +176,11 @@ Item {
     }
     var videoId = queryParam(url, "v") || (url.indexOf("youtu.be/") >= 0 ? url.split("youtu.be/")[1].split("?")[0] : "")
     var listId = queryParam(url, "list")
+    if ((videoId !== "" && !isSafeId(videoId)) || (listId !== "" && !/^[\w-]{2,}$/.test(listId)) || (videoId === "" && listId === "")) {
+      root.playState = "error"
+      root.statusText = "Malformed URL"
+      return
+    }
     root.playedIds = []
     if (listId !== "" && listId.indexOf("RD") !== 0) {
       root.queue = []

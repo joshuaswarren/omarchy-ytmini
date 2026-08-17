@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "io.github.joshuaswarren.ytmini",
   "name": "YT Mini",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "author": "Joshua Warren",
   "description": "Small floating YouTube window owned by the Omarchy shell: clipboard handoff, playlists, radio auto-advance. Stream (instant) or grab (full quality, precise seeking) via yt-dlp.",
   "kinds": [
