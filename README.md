@@ -1,5 +1,7 @@
 # YT Mini — floating YouTube window for Omarchy Quattro
 
+[![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-pink)](https://github.com/sponsors/joshuaswarren)
+
 A small YouTube player owned by the Omarchy shell itself: a layer-shell panel
 window (no browser, no mpv toplevel, no compositor windowrules). Renders
 natively through QtMultimedia inside `omarchy-shell`.
@@ -159,6 +161,14 @@ Remove: `omarchy plugin remove io.github.joshuaswarren.ytmini`.
 omarchy plugin validate /path/to/this/repo
 qmllint -I /usr/lib/qt6/qml YtPanel.qml BarWidget.qml   # plus a qs.* shim if you keep one
 ```
+
+## Support
+
+Every bit of support helps keep omarchy-ytmini alive and free. If you are able, [sponsor on GitHub](https://github.com/sponsors/joshuaswarren) or send a Lightning donation to `joshuaswarren@strike.me` to directly fund continued development and new integrations.
+
+[![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-pink?style=for-the-badge)](https://github.com/sponsors/joshuaswarren)
+
+If financial support is not an option, you can still make a big difference: [star the repo](https://github.com/joshuaswarren/omarchy-ytmini), share it, or recommend it to a colleague. Word of mouth is how most people find omarchy-ytmini.
 
 ## License
 
