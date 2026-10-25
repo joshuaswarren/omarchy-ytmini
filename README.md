@@ -101,7 +101,7 @@ Panel operation saves position in
 Optional browser setup also installs the helper and desktop entry above,
 and changes the browser bookmark file.
 
-Child commands use argument arrays, not shell strings. Input URLs are
+`yt-dlp` and `wl-paste` commands use argument arrays, not shell strings. Input URLs are
 checked for supported YouTube shapes before reaching `yt-dlp`; clipboard
 reads happen only for clipboard summons. Stream listing and playback need
 network access. Resolved media is not restricted to a googlevideo-only
