@@ -1,175 +1,134 @@
-# YT Mini — floating YouTube window for Omarchy Quattro
+# YT Mini for Omarchy Quattro
 
 [![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-pink)](https://github.com/sponsors/joshuaswarren)
 
-A small YouTube player owned by the Omarchy shell itself: a layer-shell panel
-window (no browser, no mpv toplevel, no compositor windowrules). Renders
-natively through QtMultimedia inside `omarchy-shell`.
+Play YouTube videos in a floating Omarchy shell panel. QtMultimedia plays
+inside the shell; no browser or separate mpv window is needed for playback.
+Hiding the panel leaves audio and the queue running.
 
-Built for two use cases:
-
-- **Music videos while you code** — hand it a playlist and the queue
-  auto-advances all afternoon.
-- **Instructional follow-alongs** — grab mode downloads first, so seeking and
-  pausing are instant; no rebuffering, no stream expiry.
-
-## Plugin kinds
-
-- `panel` (`YtPanel.qml`) — the floating window
-- `bar-widget` (`BarWidget.qml`) — trigger button
-- `keepLoaded: true` — hiding the window does not stop playback; queue and
-  audio survive, click the bar widget to bring the window back.
-
-## Handing off videos
-
-1. **From the browser (Helium/any Chromium):** a one-time setup registers the
-   `ytmini://` scheme, then a bookmarklet throws the current tab in one click —
-   see **Throwing from your browser** below.
-2. **Clipboard:** copy any YouTube watch/playlist URL (`Ctrl+L Ctrl+C`,
-   right-click a link), click the **▶ YT** bar widget. If the clipboard holds
-   a YouTube URL it plays immediately; otherwise the window opens with a
-   focused URL field (paste + Enter).
-3. **Keybind recipe** (add to your Hyprland config, not shipped):
-   ```
-   bind = SUPER, Y, exec, omarchy-shell shell summon io.github.joshuaswarren.ytmini '{"clipboard":true}'
-   ```
-4. **Any script or agent** through shell IPC:
-   ```
-   omarchy-shell shell summon io.github.joshuaswarren.ytmini '{"url":"https://www.youtube.com/watch?v=…"}'
-   ```
-
-Payload keys: `url`, `clipboard` (reads `wl-paste`), `grab` (bool), `radio` (bool).
-
-## Throwing from your browser
-
-Works in any Chromium-family browser (Helium, Chrome, Brave, Edge, Vivaldi):
-external protocol handlers and bookmarklets behave
-like Chrome's. One-time setup:
+## Install
 
 ```sh
-cp scripts/ytmini-throw ~/.local/bin/                          # on PATH in Omarchy
+omarchy plugin add https://github.com/joshuaswarren/omarchy-ytmini --enable
+```
+
+Requirements:
+
+- Omarchy Quattro and its shell plugin system.
+- `yt-dlp` for stream resolution, playlist listing and downloads.
+- `wl-clipboard` (`wl-paste`) for clipboard handoff.
+- QtMultimedia, supplied with the shell's Qt.
+- `ffmpeg` to merge separate audio/video streams in grab mode.
+- `python3` only for the optional bookmark installer.
+
+## Open a video
+
+Copy a YouTube watch or playlist URL, then click the YT bar widget. If the
+clipboard holds a supported URL, playback starts; otherwise paste into the
+URL field and press Enter.
+
+A keybind or script can request the same clipboard handoff:
+
+```sh
+omarchy-shell shell summon io.github.joshuaswarren.ytmini '{"clipboard":true}'
+```
+
+Payload keys are `url`, `clipboard`, `grab`, `radio`, `corner` and `move`.
+
+## Window and controls
+
+Drag the header to move the panel. Position is clamped to the screen and
+saved across later summons and shell sessions.
+
+```sh
+omarchy-shell shell summon io.github.joshuaswarren.ytmini '{"corner":"tl"}'
+omarchy-shell shell summon io.github.joshuaswarren.ytmini '{"move":{"right":200,"bottom":300}}'
+```
+
+Corners are `tl`, `tr`, `bl` and `br`. With the window focused, Space toggles
+play/pause and Left/Right seek five seconds. The panel also offers seek,
+mute, skip, stop, radio and grab controls. Hide keeps audio playing; Stop
+clears playback. Locking the session pauses and hides the panel. Unlocking
+resumes it if it was playing when locked.
+
+## Playlists and modes
+
+Playlists are listed through `yt-dlp --flat-playlist`, with at most 25 entries
+per request. The queue advances when a video ends; Skip moves to the next.
+
+Radio is experimental and off by default. It asks for YouTube's `RD` mix,
+up to 25 entries. If listing fails or yields no new playable entries,
+up-next is unavailable. Use a normal playlist when you need auto-advance.
+
+- Stream mode resolves a muxed format and plays its direct URL.
+- Grab mode downloads up to 1080p and merges to MKV when needed. It plays
+  the local file, but starting a grab still invokes `yt-dlp`. There is no
+  promise of offline replay or automatic cache cleanup.
+
+## Browser handoff (optional)
+
+The checked-in browser integration is a bookmarklet and `ytmini://` handler,
+not a browser extension. Run these commands from the repository root:
+
+```sh
+mkdir -p ~/.local/bin ~/.local/share/applications
+cp scripts/ytmini-throw ~/.local/bin/
 cp assets/io.github.joshuaswarren.ytmini.desktop ~/.local/share/applications/
 update-desktop-database ~/.local/share/applications
 xdg-mime default io.github.joshuaswarren.ytmini.desktop x-scheme-handler/ytmini
 ```
 
-Then add the fling bookmark (scripted or by hand — see below):
+Add a bookmark with this URL:
 
-
-Click it on any YouTube tab: Chromium asks once whether to open `ytmini`
-links — allow and remember. From then on it is one click, zero typing, works
-on watch pages, playlists, and `youtu.be` shorts links.
-
-**Adding the bookmark automatically:** `scripts/add-browser-bookmark.py`
-appends the bookmarklet to any Chromium-family browser's bookmark bar
-(Helium: `~/.config/net.imput.helium/Default/Bookmarks`; Chrome:
-`~/.config/google-chrome/default/Bookmarks`). The browser must
-be **closed** while it runs — Chromium rewrites the file from memory on exit.
-Idempotent; `--dry` previews.
-
-The manual equivalent: add a bookmark whose URL is
-`javascript:location.href='ytmini://throw?url='+encodeURIComponent(location.href)`.
-
-## Window position
-
-Drag the window by its header bar — the position is clamped to the screen and
-persisted to `$XDG_STATE_HOME/ytmini/window.json`, surviving re-summons and
-
-```
-omarchy-shell shell summon io.github.joshuaswarren.ytmini '{"corner":"tl"}'   # tl|tr|bl|br
-omarchy-shell shell summon io.github.joshuaswarren.ytmini '{"move":{"right":200,"bottom":300}}'
+```text
+javascript:location.href='ytmini://throw?url='+encodeURIComponent(location.href)
 ```
 
-Locking the session pauses playback and hides the window; unlocking resumes if
-it was playing when locked.
+Click it on a YouTube tab and allow the external-protocol prompt.
 
+The optional `scripts/add-browser-bookmark.py` edits a chosen Chromium
+profile's `Bookmarks` file. Close the browser first: it rewrites that file
+from memory on exit. `--dry` previews without writing. Example profile paths:
 
-Prefer a toolbar button and keyboard shortcut? That is the planned v0.2
-companion extension (native-messaging host + MV3 extension, same pattern as
-Omarchy's built-in yt-dlp extension).
+- Helium: `~/.config/net.imput.helium/Default/Bookmarks`.
+- Chrome: `~/.config/google-chrome/Default/Bookmarks`.
 
-## Troubleshooting
+## State and security
 
-`omarchy-shell` watches plugin files and hot-reloads, but an in-place reload
-can leave a stale instance running (symptom: summons return `ok` but code
-changes or payloads seem ignored). After `omarchy plugin update` or manual
-edits, if behavior looks stale:
+Panel operation saves position in
+`${XDG_STATE_HOME:-~/.local/state}/ytmini/window.json` and grab files under
+`${XDG_CACHE_HOME:-~/.cache}/ytmini/`. Grab files remain until you remove them.
+Optional browser setup also installs the helper and desktop entry above,
+and changes the browser bookmark file.
 
+Child commands use argument arrays, not shell strings. Input URLs are
+checked for supported YouTube shapes before reaching `yt-dlp`; clipboard
+reads happen only for clipboard summons. Stream listing and playback need
+network access. Resolved media is not restricted to a googlevideo-only
+host list.
+
+## Update, remove and troubleshoot
+
+```sh
+omarchy plugin update io.github.joshuaswarren.ytmini
+omarchy plugin remove io.github.joshuaswarren.ytmini
 ```
+
+Plugin removal does not undo the optional browser setup. Remove its
+bookmark, helper and desktop entry separately if you no longer use them.
+
+If an update appears stale, disable and enable the plugin:
+
+```sh
 omarchy plugin disable io.github.joshuaswarren.ytmini
 omarchy plugin enable io.github.joshuaswarren.ytmini
 ```
 
-## Playlists and up-next
-
-- A `playlist?list=…` URL is enumerated with `yt-dlp --flat-playlist` (fast,
-  no per-video resolution) into the queue; when a video ends the engine
-  advances automatically, and ⏭ skips to the next entry.
-- **Radio mode (∞) is experimental and off by default:** YouTube currently
-  blocks radio-mix (`RD…`) listing ("This playlist type is unviewable"), so
-  single-video up-next usually yields nothing. Enabled, it tries the mix and
-  falls back cleanly. Use a real playlist for reliable up-next; this should
-  start working again if YouTube/yt-dlp re-allow mix enumeration.
-
-## Modes
-
-- **Stream (default):** resolves the best muxed format (`-f 18/22/best` —
-  360p/720p progressive) and plays the direct URL. Instant start.
-- **Grab (⤓ toggle in the header):** downloads up to 1080p
-  (`bv*[height<=1080]+ba/b`, merged to MKV) to
-  `$XDG_CACHE_HOME/ytmini/<videoId>.mkv`, then plays the local file. Precise
-  seeking; replaying a cached video skips the network entirely.
-
-Controls: space = play/pause, ←/→ = seek ±5s (window focused), seek bar,
-mute, skip, stop. `∞` toggles radio, `⤓` toggles grab, `✕` hides
-(audio keeps playing), `■` stops and clears.
-
-## Requirements
-
-- Omarchy Quattro (shell plugin system, `omarchy-shell` CLI)
-- `yt-dlp` (pacman: `yt-dlp`)
-- `wl-clipboard` (`wl-paste`) for the clipboard handoff
-- QtMultimedia (ships with the shell's Qt)
-
-## Install
-
-```
-omarchy plugin add <this repository's git URL> --enable
-omarchy plugin enable io.github.joshuaswarren.ytmini   # bar widget: right section
-```
-
-Update: `omarchy plugin update io.github.joshuaswarren.ytmini`.
-Remove: `omarchy plugin remove io.github.joshuaswarren.ytmini`.
-
-## Security-relevant behavior
-
-- Spawns `yt-dlp` and `wl-paste` as child processes with **structured argument
-  arrays** — never through a shell string, so URLs cannot inject commands.
-- URLs are accepted only if they match `youtube.com/watch|playlist` or
-  `youtu.be/<id>` before being passed to `yt-dlp`.
-- The `ytmini://` handler strips quote/backslash characters before embedding a
-  URL in the summon payload, and the panel re-validates it against the same
-  YouTube URL shape.
-- Reads the clipboard only when explicitly summoned with `{"clipboard":true}`
-  (bar-widget click or keybind) and only uses it if it is a YouTube URL.
-- Writes only to `$XDG_CACHE_HOME/ytmini/`. No network endpoints other than
-  YouTube/googlevideo via `yt-dlp`. No credentials, no elevated access.
-
-## Development
-
-```
-omarchy plugin validate /path/to/this/repo
-qmllint -I /usr/lib/qt6/qml YtPanel.qml BarWidget.qml   # plus a qs.* shim if you keep one
-```
-
 ## Support
 
-Every bit of support helps keep omarchy-ytmini alive and free. If you are able, [sponsor on GitHub](https://github.com/sponsors/joshuaswarren) or send a Lightning donation to `joshuaswarren@strike.me` to directly fund continued development and new integrations.
-
-[![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-pink?style=for-the-badge)](https://github.com/sponsors/joshuaswarren)
-
-If financial support is not an option, you can still make a big difference: [star the repo](https://github.com/joshuaswarren/omarchy-ytmini), share it, or recommend it to a colleague. Word of mouth is how most people find omarchy-ytmini.
+[Sponsor on GitHub](https://github.com/sponsors/joshuaswarren) or use
+Lightning at `joshuaswarren@strike.me`.
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT. See [LICENSE](LICENSE).
